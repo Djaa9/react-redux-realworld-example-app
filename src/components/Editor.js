@@ -1,5 +1,5 @@
 import ListErrors from './ListErrors';
-import React from 'react';
+import React, { useEffect } from 'react';
 import agent from '../agent';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -11,10 +11,10 @@ import {
   UPDATE_FIELD_EDITOR
 } from '../constants/actionTypes';
 
-const Editor = () => {
+const Editor = ({match}) => {
   const dispatch = useDispatch();
   const { title, description, body, tagList, articleSlug, errors, tagInput, inProgress } = useSelector((state) => state.editor);
-  
+
   const onUpdateField = (key, value) => { dispatch({ type: UPDATE_FIELD_EDITOR, key, value })} 
   
   const changeTitle = (value) => { onUpdateField('title', value)};
@@ -56,26 +56,15 @@ const Editor = () => {
       onSubmit(promise);
     };
 
-  // componentWillReceiveProps(nextProps) {
-  //   if (match.params.slug !== nextmatch.params.slug) {
-  //     if (nextProps.match.params.slug) {
-  //       onUnload();
-  //       return onLoad(agent.Articles.get(match.params.slug));
-  //     }
-  //     onLoad(null);
-  //   }
-  // }
+  useEffect(() => {
+    if(match.params.slug)
+      onLoad(agent.Articles.get(match.params.slug))
+    else {
+      onLoad(null);
+    }
 
-  // componentWillMount() {
-  //   if (match.params.slug) {
-  //     return onLoad(agent.Articles.get(match.params.slug));
-  //   }
-  //   onLoad(null);
-  // }
-
-  // componentWillUnmount() {
-  //   onUnload();
-  // }
+    return () => onUnload();
+  },[match])
 
     return (
       <div className="editor-page">
