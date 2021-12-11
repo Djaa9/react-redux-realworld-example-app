@@ -30,9 +30,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch({ type: UPDATE_FIELD_EDITOR, key, value })
 });
 
-class Editor extends React.Component {
-  constructor() {
-    super();
+const Editor = () => {
 
     const updateFieldEvent =
       key => ev => this.props.onUpdateField(key, ev.target.value);
@@ -68,30 +66,28 @@ class Editor extends React.Component {
 
       this.props.onSubmit(promise);
     };
-  }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.match.params.slug !== nextProps.match.params.slug) {
-      if (nextProps.match.params.slug) {
-        this.props.onUnload();
-        return this.props.onLoad(agent.Articles.get(this.props.match.params.slug));
-      }
-      this.props.onLoad(null);
-    }
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   if (this.props.match.params.slug !== nextProps.match.params.slug) {
+  //     if (nextProps.match.params.slug) {
+  //       this.props.onUnload();
+  //       return this.props.onLoad(agent.Articles.get(this.props.match.params.slug));
+  //     }
+  //     this.props.onLoad(null);
+  //   }
+  // }
 
-  componentWillMount() {
-    if (this.props.match.params.slug) {
-      return this.props.onLoad(agent.Articles.get(this.props.match.params.slug));
-    }
-    this.props.onLoad(null);
-  }
+  // componentWillMount() {
+  //   if (this.props.match.params.slug) {
+  //     return this.props.onLoad(agent.Articles.get(this.props.match.params.slug));
+  //   }
+  //   this.props.onLoad(null);
+  // }
 
-  componentWillUnmount() {
-    this.props.onUnload();
-  }
+  // componentWillUnmount() {
+  //   this.props.onUnload();
+  // }
 
-  render() {
     return (
       <div className="editor-page">
         <div className="container page">
@@ -173,6 +169,6 @@ class Editor extends React.Component {
       </div>
     );
   }
-}
 
-export default connect(mapStateToProps, mapDispatchToProps)(Editor);
+  export default Editor;
+// export default connect(mapStateToProps, mapDispatchToProps)(Editor);
