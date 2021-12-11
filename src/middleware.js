@@ -32,8 +32,11 @@ const promiseMiddleware = store => next => action => {
         }
         console.log('ERROR', error);
         action.error = true;
-
-        if(error.response) {
+        
+        if(error.status === 500) {
+          action.payload = {errors: {error: ["Something went wrong. Unknown error (500)"]}}; 
+        }
+        else if(error.response) {          
           if(error.response.body) {
             action.payload = error.response.body;
           }
