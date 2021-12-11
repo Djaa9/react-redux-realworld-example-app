@@ -72,3 +72,9 @@ The example application is a social blogging site (i.e. a Medium.com clone) call
 <br />
 
 [![Brought to you by Thinkster](https://raw.githubusercontent.com/gothinkster/realworld/master/media/end.png)](https://thinkster.io)
+
+**My notes**
+There are several ugly erros in the editor:
+- The editor does not update if the url changes
+- If you create a post with the same content as an exisisting post, they will have the same identifyer. Results in (Unhandled Rejection (TypeError): Cannot read properties of undefined (reading 'slug'))
+- If all fields in the editor are not filled you get and error. Results in (Unhandled Rejection (TypeError): Cannot read properties of undefined (reading 'slug')) 
