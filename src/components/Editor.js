@@ -21,22 +21,28 @@ const Editor = ({match}) => {
   const changeDescription = (value) => { onUpdateField('description', value)};
   const changeBody = (value) => { onUpdateField('body', value)};
   const changeTagInput = (value) => { onUpdateField('tagInput', value)};
-  const onAddTag = () => { dispatch({ type: ADD_TAG }) };
   
+  const onAddTag = () => { dispatch({ type: ADD_TAG }) };
   const onLoad = (payload) => { dispatch({ type: EDITOR_PAGE_LOADED, payload }) };
   const onRemoveTag = (tag) => { dispatch({ type: REMOVE_TAG, tag })};
   const onSubmit = (payload) => { dispatch({ type: ARTICLE_SUBMITTED, payload }) };
-  const onUnload = (payload) => { dispatch({ type: EDITOR_PAGE_UNLOADED }) };
+  const onUnload = () => { dispatch({ type: EDITOR_PAGE_UNLOADED }) };
+
+  useEffect(() => {
+    if(match.params.slug)
+      onLoad(agent.Articles.get(match.params.slug))
+    else {
+      onLoad(null);
+    }
+
+    return () => onUnload();
+  },[match])
 
   const watchForEnter = (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
         onAddTag();
       }
-    };
-
-  const removeTagHandler = (tag) => {
-      onRemoveTag(tag);
     };
 
   const submitForm = (e) => {
@@ -55,16 +61,6 @@ const Editor = ({match}) => {
 
       onSubmit(promise);
     };
-
-  useEffect(() => {
-    if(match.params.slug)
-      onLoad(agent.Articles.get(match.params.slug))
-    else {
-      onLoad(null);
-    }
-
-    return () => onUnload();
-  },[match])
 
     return (
       <div className="editor-page">
@@ -120,7 +116,7 @@ const Editor = ({match}) => {
                           return (
                             <span className="tag-default tag-pill" key={tag}>
                               <i  className="ion-close-round"
-                                  onClick={() => removeTagHandler(tag)}>
+                                  onClick={() => onRemoveTag(tag)}>
                               </i>
                               {tag}
                             </span>
