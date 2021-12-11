@@ -32,7 +32,19 @@ const promiseMiddleware = store => next => action => {
         }
         console.log('ERROR', error);
         action.error = true;
-        action.payload = error.response.body;
+        
+        if(error.status === 500) {
+          action.payload = {errors: {error: ["Something went wrong. Unknown error (500)"]}}; 
+        }
+        else if(error.response) {          
+          if(error.response.body) {
+            action.payload = error.response.body;
+          }
+        }
+        else if(error.message) {
+            action.payload = {errors: {error: [error.message]}};
+        }
+
         if (!action.skipTracking) {
           store.dispatch({ type: ASYNC_END, promise: action.payload });
         }
