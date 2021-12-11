@@ -28,19 +28,19 @@ const Editor = () => {
   const onSubmit = (payload) => { dispatch({ type: ARTICLE_SUBMITTED, payload }) };
   const onUnload = (payload) => { dispatch({ type: EDITOR_PAGE_UNLOADED }) };
 
-  const watchForEnter = ev => {
-      if (ev.key === "Enter") {
-        ev.preventDefault();
+  const watchForEnter = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
         onAddTag();
       }
     };
 
-  const removeTagHandler = tag => () => {
+  const removeTagHandler = (tag) => {
       onRemoveTag(tag);
     };
 
-  const submitForm = ev => {
-      ev.preventDefault();
+  const submitForm = (e) => {
+      e.preventDefault();
       const article = {
         title,
         description,
@@ -131,7 +131,7 @@ const Editor = () => {
                           return (
                             <span className="tag-default tag-pill" key={tag}>
                               <i  className="ion-close-round"
-                                  onClick={removeTagHandler(tag)}>
+                                  onClick={() => removeTagHandler(tag)}>
                               </i>
                               {tag}
                             </span>
