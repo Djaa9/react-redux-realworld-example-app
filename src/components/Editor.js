@@ -1,5 +1,5 @@
 import ListErrors from './ListErrors';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import agent from '../agent';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -11,10 +11,10 @@ import {
   UPDATE_FIELD_EDITOR
 } from '../constants/actionTypes';
 
-const isHMTL = new RegExp("/<\/?[a-z][\s\S]*>/i");
+const hasHMTLRegExp = new RegExp("/<\/?[a-z][\s\S]*>/i");
 
 const containsHTML = (field) => {
-  return isHMTL.test(field)
+  return hasHMTLRegExp.test(field)
 } 
 
 const isEqual = (first, second) => {
@@ -26,18 +26,18 @@ const isEmpty = (field) => {
 }
 
 const validateArticle = (article) => {
-  const errors = []
+  const errors = {}
 
-  if(!isEmpty(article.title) && 
-     !isEmpty(article.description) && 
-     !isEmpty(article.body))
-    errors.push({ error: ['Title, description and body must be filled']});
+  if(isEmpty(article.title) || 
+     isEmpty(article.description) || 
+     isEmpty(article.body))
+    errors.hasEmptyFieldsError = ['Title, description and body must be filled'];
   
     if(isEqual(article.title, article.description))
-    errors.push({ error: ['Description cannot be the same as the title']});
+    errors.titleAndDescriptionEqualsError = ['Description cannot be the same as the title'];
   
     if(!containsHTML(article.body))
-    errors.push({ error: ['Body cannot contain HTML']});
+    errors.bodyContainsHTMLerror = ['Body cannot contain HTML'];
 
   return errors;
 };
@@ -59,6 +59,8 @@ const Editor = ({match}) => {
   const onSubmit = (payload) => { dispatch({ type: ARTICLE_SUBMITTED, payload }) };
   const onUnload = () => { dispatch({ type: EDITOR_PAGE_UNLOADED }) };
 
+  const [validationErrors, setValidationErrors] = useState({}); 
+
   useEffect(() => {
     if(match.params.slug)
       onLoad(agent.Articles.get(match.params.slug))
@@ -78,6 +80,7 @@ const Editor = ({match}) => {
 
   const submitForm = (e) => {
       e.preventDefault();
+      
       const article = {
         title,
         description,
@@ -85,10 +88,12 @@ const Editor = ({match}) => {
         tagList
       };
 
-      const articleIsValid = validateArticle(article);
-
-      if(!isTitleValid || !isDescriptionValid || isBodyValid)
+      const validationResults = validateArticle(article);
+      
+      if(validationErrors) {
+        setValidationErrors(validationResults);
         return
+      }
 
       const slug = { slug: articleSlug };
       const promise = articleSlug ?
@@ -104,7 +109,7 @@ const Editor = ({match}) => {
           <div className="row">
             <div className="col-md-10 offset-md-1 col-xs-12">
 
-              <ListErrors errors={errors}></ListErrors>
+              <ListErrors errors={{...errors, ...validationErrors}}></ListErrors>
 
               <form>
                 <fieldset>
