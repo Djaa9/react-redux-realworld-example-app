@@ -11,10 +11,11 @@ import {
   UPDATE_FIELD_EDITOR
 } from '../constants/actionTypes';
 
-const hasHMTLRegExp = new RegExp("/<\/?[a-z][\s\S]*>/i");
+const hasHMTLRegExp = /<\/?[a-z][\s\S]*>/i;
 
 const containsHTML = (field) => {
-  return hasHMTLRegExp.test(field)
+  const result = hasHMTLRegExp.test(field);
+  return result;
 } 
 
 const isEqual = (first, second) => {
@@ -36,7 +37,7 @@ const validateArticle = (article) => {
     if(isEqual(article.title, article.description))
     errors.titleAndDescriptionEqualsError = ['Description cannot be the same as the title'];
   
-    if(!containsHTML(article.body))
+    if(containsHTML(article.body))
     errors.bodyContainsHTMLerror = ['Body cannot contain HTML'];
 
   return errors;
@@ -90,7 +91,7 @@ const Editor = ({match}) => {
 
       const validationResults = validateArticle(article);
       
-      if(validationErrors) {
+      if(Object.keys(validationResults).length > 0) {
         setValidationErrors(validationResults);
         return
       }
