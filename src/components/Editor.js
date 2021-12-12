@@ -1,5 +1,5 @@
 import ListErrors from './ListErrors';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import agent from '../agent';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -10,6 +10,38 @@ import {
   EDITOR_PAGE_UNLOADED,
   UPDATE_FIELD_EDITOR
 } from '../constants/actionTypes';
+
+const hasHMTLRegExp = /<\/?[a-z][\s\S]*>/i;
+
+const containsHTML = (field) => {
+  const result = hasHMTLRegExp.test(field);
+  return result;
+} 
+
+const isEqual = (first, second) => {
+  return first === second;
+}
+
+const isEmpty = (field) => {
+  return !field;
+}
+
+const validateArticle = (article) => {
+  const errors = {}
+
+  if(isEmpty(article.title) || 
+     isEmpty(article.description) || 
+     isEmpty(article.body))
+    errors.hasEmptyFieldsError = ['Title, description and body must be filled'];
+  
+    if(isEqual(article.title, article.description))
+    errors.titleAndDescriptionEqualsError = ['Description cannot be the same as the title'];
+  
+    if(containsHTML(article.body))
+    errors.bodyContainsHTMLerror = ['Body cannot contain HTML'];
+
+  return errors;
+};
 
 const Editor = ({match}) => {
   const dispatch = useDispatch();
@@ -28,6 +60,8 @@ const Editor = ({match}) => {
   const onSubmit = (payload) => { dispatch({ type: ARTICLE_SUBMITTED, payload }) };
   const onUnload = () => { dispatch({ type: EDITOR_PAGE_UNLOADED }) };
 
+  const [validationErrors, setValidationErrors] = useState({}); 
+
   useEffect(() => {
     if(match.params.slug)
       onLoad(agent.Articles.get(match.params.slug))
@@ -35,7 +69,7 @@ const Editor = ({match}) => {
       onLoad(null);
     }
 
-    return () => onUnload();
+    return onUnload;
   },[match])
 
   const watchForEnter = (e) => {
@@ -47,12 +81,20 @@ const Editor = ({match}) => {
 
   const submitForm = (e) => {
       e.preventDefault();
+      
       const article = {
         title,
         description,
         body,
         tagList
       };
+
+      const validationResults = validateArticle(article);
+      
+      if(Object.keys(validationResults).length > 0) {
+        setValidationErrors(validationResults);
+        return
+      }
 
       const slug = { slug: articleSlug };
       const promise = articleSlug ?
@@ -68,7 +110,7 @@ const Editor = ({match}) => {
           <div className="row">
             <div className="col-md-10 offset-md-1 col-xs-12">
 
-              <ListErrors errors={errors}></ListErrors>
+              <ListErrors errors={{...errors, ...validationErrors}}></ListErrors>
 
               <form>
                 <fieldset>
