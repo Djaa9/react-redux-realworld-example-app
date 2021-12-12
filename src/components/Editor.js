@@ -11,6 +11,37 @@ import {
   UPDATE_FIELD_EDITOR
 } from '../constants/actionTypes';
 
+const isHMTL = new RegExp("/<\/?[a-z][\s\S]*>/i");
+
+const containsHTML = (field) => {
+  return isHMTL.test(field)
+} 
+
+const isEqual = (first, second) => {
+  return first === second;
+}
+
+const isEmpty = (field) => {
+  return !field;
+}
+
+const validateArticle = (article) => {
+  const errors = []
+
+  if(!isEmpty(article.title) && 
+     !isEmpty(article.description) && 
+     !isEmpty(article.body))
+    errors.push({ error: ['Title, description and body must be filled']});
+  
+    if(isEqual(article.title, article.description))
+    errors.push({ error: ['Description cannot be the same as the title']});
+  
+    if(!containsHTML(article.body))
+    errors.push({ error: ['Body cannot contain HTML']});
+
+  return errors;
+};
+
 const Editor = ({match}) => {
   const dispatch = useDispatch();
   const { title, description, body, tagList, articleSlug, errors, tagInput, inProgress } = useSelector((state) => state.editor);
@@ -35,7 +66,7 @@ const Editor = ({match}) => {
       onLoad(null);
     }
 
-    return () => onUnload();
+    return onUnload;
   },[match])
 
   const watchForEnter = (e) => {
@@ -53,6 +84,11 @@ const Editor = ({match}) => {
         body,
         tagList
       };
+
+      const articleIsValid = validateArticle(article);
+
+      if(!isTitleValid || !isDescriptionValid || isBodyValid)
+        return
 
       const slug = { slug: articleSlug };
       const promise = articleSlug ?
